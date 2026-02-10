@@ -70,11 +70,11 @@ print("Stock tree S (rows i=#up, cols n=time):\n", S)
 
 # Plots (as required)
 plot_evolution_root(call_trees, strikes, t,
-                    title="Evolution of Call Option Price over Time (root node)",
+                    title="Evolution of Call Option Price over Time",
                     ylabel="Call price H[0,n]")
 
 plot_evolution_root(put_trees, strikes, t,
-                    title="Evolution of Put Option Price over Time (root node)",
+                    title="Evolution of Put Option Price over Time",
                     ylabel="Put price H[0,n]")
 
 
