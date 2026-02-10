@@ -53,5 +53,5 @@ plt.xlabel("time")
 plt.ylabel("upward steps")
 
 
-
+asdf
 
