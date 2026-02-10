@@ -22,23 +22,23 @@ def binomial_option_trees(S0, u, d, r, t, strikes, option_type="call"):
 
     opt = {}  # empty dictionary for option value tree
     for K in strikes:
-        V = np.zeros((t + 1, t + 1))
+        H = np.zeros((t + 1, t + 1))
 
         # payoff at maturity
         for i in range(t + 1):
             if option_type == "call":
-                V[i, t] = max(S[i, t] - K, 0.0)
+                H[i, t] = max(S[i, t] - K, 0.0)
             elif option_type == "put":
-                V[i, t] = max(K - S[i, t], 0.0)
+                H[i, t] = max(K - S[i, t], 0.0)
             else:
                 raise ValueError("option_type must be 'call' or 'put'")
 
         # backward induction
         for n in range(t - 1, -1, -1):
             for i in range(n + 1):
-                V[i, n] = (1 / (1 + r)) * (q * V[i + 1, n + 1] + (1 - q) * V[i, n + 1])
+                H[i, n] = (1 / (1 + r)) * (q * H[i + 1, n + 1] + (1 - q) * V[i, n + 1])
 
-        opt[K] = V
+        opt[K] = H
 
     return q, S, opt
 
