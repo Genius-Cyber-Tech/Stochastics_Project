@@ -4,54 +4,59 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def price_tree(u, d, r, t, k, s): 
+def binomial_option_trees(S0, u, d, r, t, strikes, option_type="call"): 
     # risk neutral probability
     q = (1 + r - d) / (u - d)
     print(f"The risk-neutral probability is: {q}")
 
-    # create price tree
-    tree = np.zeros((t + 1, t + 1))
+    # create stock price tree
+    S = np.zeros((t + 1, t + 1))
     option_tree = np.zeros((t + 1, t + 1))
-    # columns n = time steps
+     # stock tree: S[i,n] where i=#up moves, n=time
     for n in range(t + 1):
+        for i in range(n + 1):
+           S[i,n] = (u**i) * (d**(n-i)) * S0
+            # example: S[0,4] indicates price going down 4 times
+            # example: S[4,4] indicates price going up 4 times      
+             
+
+    opt = {}  # empty dictionary for option value tree
+    for K in strikes:
+        V = np.zeros((t + 1, t + 1))
+
+        # payoff at maturity
         for i in range(t + 1):
-            s_n = (u**i) * (d**(n-i)) * s
-            strike = k[0]
-            # example: tree[0,4] indicates price going down 4 times
-            # example: tree[4,4] indicates price going up 4 times
-            tree[i, n] = s_n          
+            if option_type == "call":
+                V[i, t] = max(S[i, t] - K, 0.0)
+            elif option_type == "put":
+                V[i, t] = max(K - S[i, t], 0.0)
+            else:
+                raise ValueError("option_type must be 'call' or 'put'")
 
-    # calculate options at last step
-    for i in range(i + 1):
-            #call option at prior steps for first strike (for now)
-            #F_call(S_4) = max(S_4 - K, 0)
-            option_tree[i, t] = max(tree[i, t] - strike, 0)
+        # backward induction
+        for n in range(t - 1, -1, -1):
+            for i in range(n + 1):
+                V[i, n] = (1 / (1 + r)) * (q * V[i + 1, n + 1] + (1 - q) * V[i, n + 1])
 
-    for n in range(t - 1, -1, -1):
-         #TO DO: calculate H_n at each step backwards
-         # discount the stock price process 
-        print("pending")
+        opt[K] = V
 
-    print("Stock price grid: \n", tree)
+    return q, S, opt
 
-    return q
+
+
 
 # Input
-up = 1.1
-down = 0.9
-rate = 0.02
-time = 4
-k_step = np.array([90, 95, 100, 105, 110]) # strikes
-s_0 = float(input("Enter the beginning stock price: ")) #100
+S0, u, d, r, t = 100, 1.1, 0.9, 0.02, 4
+strikes = [90, 95, 100, 105, 110]
 
-# Graphing
-value = price_tree(up,down,rate,time,k_step,s_0)
+q, S, call_trees = binomial_option_trees(S0, u, d, r, t, strikes, "call")
+_, _, put_trees  = binomial_option_trees(S0, u, d, r, t, strikes, "put")
 
-# Messing around
-plt.plot(5, 5) #will need to adjust later
-plt.xlabel("time")
-plt.ylabel("upward steps")
+print("risk-neutral q =", q)
+print("Stock tree S (rows i=#up, cols n=time):\n", S)
 
-asdf
+
+
+
 
 
