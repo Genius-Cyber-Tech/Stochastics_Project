@@ -1,7 +1,10 @@
 # Stochastics_Project
 Here is how to create the dev branch:
+
 • git pull to make sure you are up to date.
+
 • git switch -c dev to create the dev branch and switch to it.
+
 • git push --set-upstream origin dev to connect your local dev branch with the repository.
 Here is how to switch to the dev branch if it has already been created:
 • git pull to make sure you are up to date.
