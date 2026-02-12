@@ -136,7 +136,9 @@ def compute_replicating_portfolios(S, opt_trees, u, d, r, t, strikes):
         """
         portfolios[K] = {
             'V': V,
-            'H': H
+            'H': H,
+            'alpha': alpha,
+            'beta': beta
         }   
     
     return portfolios
@@ -185,6 +187,24 @@ def plot_portfolio_and_option(portfolios, strikes, t, option_type):
         print(f" For K={K}: Maximal difference between V and H = {max_diff:.1e}")
 
 
+def print_alpha_beta(portfolios, strikes, t):
+    """
+    Print alpha_n and beta_n at each node (n,i) for each strike.
+    """
+    for K in strikes:
+        print(f"\n========== Replicating portfolio for K = {K} ==========")
+        alpha = portfolios[K]['alpha']
+        beta = portfolios[K]['beta']
+        
+        for n in range(t):
+            print(f"\nTime step n = {n}:")
+            for i in range(n + 1):
+                print(
+                    f"Node (i={i}): "
+                    f"alpha = {alpha[i, n]: .6f}, "
+                    f"beta = {beta[i, n]: .6f}"
+                )
+
 #Calculate the portfolios corresponding to the call and put option via the above defined function
 call_portfolios = compute_replicating_portfolios(S, call_trees, u, d, r, t, strikes)
 put_portfolios = compute_replicating_portfolios(S, put_trees, u, d, r, t, strikes)
@@ -195,3 +215,10 @@ plot_portfolio_and_option(put_portfolios, strikes, t, "put")
 
 
 
+print_alpha_beta(call_portfolios, strikes, t)
+print_alpha_beta(put_portfolios, strikes, t)
+
+
+
+
+# ==== PART C ===
