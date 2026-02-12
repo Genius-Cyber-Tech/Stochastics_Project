@@ -64,6 +64,26 @@ def plot_evolution_root(opt_trees, strikes, t, title, ylabel):
     plt.grid(True)
     plt.show()
 
+def plot_partA_all_nodes(opt_trees, strikes, t):
+    plt.figure(figsize=(8, 5))
+
+    for K in strikes:
+        H = opt_trees[K]
+        for n in range(t + 1):
+            x = np.full(n + 1, n)     # time n
+            y = H[:n + 1, n]          # all nodes at time n
+            plt.scatter(
+                x, y,
+                alpha=0.7,
+                label=f"K={K}" if n == 0 else ""
+            )
+    plt.xlabel("time step n")
+    plt.ylabel("option price")
+    plt.title("Part A: Option prices at all nodes (binomial model)")
+    plt.xticks(range(t + 1))
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 # Input
 S0, u, d, r, t = 100, 1.1, 0.9, 0.02, 4
@@ -77,6 +97,7 @@ print("Stock tree S (rows i=#up, cols n=time):\n", S)
 
 
 # Plots (as required)
+# Plot with the average of the nodes at each time step to get a single line per strike price, for better visualization of the evolution of the option price over time.
 plot_evolution_root(call_trees, strikes, t,
                     title="Evolution of Call Option Price over Time",
                     ylabel="Call price H[0,n]")
@@ -84,6 +105,10 @@ plot_evolution_root(call_trees, strikes, t,
 plot_evolution_root(put_trees, strikes, t,
                     title="Evolution of Put Option Price over Time",
                     ylabel="Put price H[0,n]")
+
+#Plot all nodes at each time 
+plot_partA_all_nodes(call_trees, strikes, t)
+plot_partA_all_nodes(put_trees, strikes, t)
 
 # ==== PART B ===
 
@@ -223,7 +248,6 @@ plot_portfolio_and_option(put_portfolios, strikes, t, "put")
 # Print alpha and beta values at each node for each strike price
 print_alpha_beta(call_portfolios, strikes, t)
 print_alpha_beta(put_portfolios, strikes, t)
-
 
 
 
