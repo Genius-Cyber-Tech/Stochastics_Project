@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# ==== PART A ===
 def binomial_option_trees(S0, u, d, r, t, strikes, option_type="call"): 
     # risk neutral probability
     q = (1 + r - d) / (u - d)
@@ -110,8 +111,8 @@ def compute_replicating_portfolios(S, opt_trees, u, d, r, t, strikes):
                 S_n = S[i, n]
             
                 # Values in up and down states at time n+1
-                V_up = H[i + 1, n + 1]
-                V_down = H[i, n + 1]
+                V_up = V[i + 1, n + 1]
+                V_down = V[i, n + 1]
             
                 # Stock prices in up and down states
                 S_up = u * S_n
