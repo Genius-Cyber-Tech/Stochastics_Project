@@ -47,8 +47,14 @@ def binomial_option_trees(S0, u, d, r, t, strikes, option_type="call"):
 def plot_evolution_root(opt_trees, strikes, t, title, ylabel):
     times = np.arange(t + 1)
     plt.figure()
+    
     for K in strikes:
-        series = [opt_trees[K][0, n] for n in times]
+        # want nodes that were actually calculated to take the avg
+        series = []
+        for n in times:
+            # get active nodes at time n
+            nodes = opt_trees[K][:n+1, n]
+            series.append(np.mean(nodes))
         plt.plot(times, series, marker="o", label=f"K={K}")
     plt.xlabel("time step n")
     plt.ylabel(ylabel)
@@ -214,8 +220,7 @@ put_portfolios = compute_replicating_portfolios(S, put_trees, u, d, r, t, strike
 plot_portfolio_and_option(call_portfolios, strikes, t, "call")
 plot_portfolio_and_option(put_portfolios, strikes, t, "put")
 
-
-
+# Print alpha and beta values at each node for each strike price
 print_alpha_beta(call_portfolios, strikes, t)
 print_alpha_beta(put_portfolios, strikes, t)
 
