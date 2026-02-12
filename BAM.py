@@ -3,6 +3,7 @@
 # matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+from math import exp, log, sqrt, erf
 
 # ==== PART A ===
 def binomial_option_trees(S0, u, d, r, t, strikes, option_type="call"): 
@@ -222,3 +223,53 @@ print_alpha_beta(put_portfolios, strikes, t)
 
 
 # ==== PART C ===
+
+# ---- Normal CDF without scipy ----
+def norm_cdf(x: float):
+    return 0.5 * (1.0 + erf(x / sqrt(2.0)))
+
+def bs_call_price(S0, K, r, sigma, T):
+    d1 = (log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrt(T))
+    d2 = d1 - sigma * sqrt(T)
+    return S0 * norm_cdf(d1) - K * exp(-r * T) * norm_cdf(d2)
+
+def binomial_call_price_CRR(S0, K, r, sigma, T, N):
+    dt = T / N
+    u = exp(sigma * sqrt(dt))
+    d = exp(-sigma * sqrt(dt))
+    r_step = exp(r * dt) - 1  # convert cont. rate to per-step simple rate
+
+    _, _, opt = binomial_option_trees(S0, u, d, r_step, N, [K], option_type="call")
+    return opt[K][0, 0]
+
+S0, K, r, sigma, T = 100, 100, 0.05, 0.2, 1.0
+Ns = [5, 10, 20, 50, 100, 1000]
+
+bs_price = bs_call_price(S0, K, r, sigma, T)
+bin_prices = [binomial_call_price_CRR(S0, K, r, sigma, T, N) for N in Ns]
+errors = [abs(p - bs_price) for p in bin_prices]
+
+print("Black–Scholes price:", bs_price)
+for N, p, e in zip(Ns, bin_prices, errors):
+    print(f"N={N:4d}  Binomial={p:.6f}  Error={e:.6e}")
+
+plt.figure()
+plt.plot(Ns, bin_prices, marker='o', label="Binomial (CRR)")
+plt.axhline(bs_price, linestyle='--', label="Black–Scholes")
+plt.xscale('log')
+plt.xlabel("N (log scale)")
+plt.ylabel("Call price at t=0")
+plt.title("Binomial (CRR) price convergence to Black–Scholes")
+plt.grid(True)
+plt.legend()
+plt.show()
+
+plt.figure()
+plt.plot(Ns, errors, marker='o')
+plt.xscale('log'); plt.yscale('log')
+plt.xlabel("N (log scale)")
+plt.ylabel("|Binomial - Black–Scholes| (log scale)")
+plt.title("Convergence error")
+plt.grid(True)
+plt.show()
+
