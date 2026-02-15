@@ -155,44 +155,54 @@ def compute_replicating_portfolios(S, opt_trees, u, d, r, t, strikes):
 
 def plot_portfolio_and_option(portfolios, strikes, t, option_type):
     """
-    Plot the portfolio value V[0,n] compared to the option price H[0,n] (root path).
-    Equality is expected.
+    Plot expectation-style comparison:
+    - Left subplot: average portfolio value E[V_n]
+    - Right subplot: average option price E[H_n]
+    Expectation = average over all active nodes at time n (same as Part A)
     """
     times = np.arange(t + 1)
-    
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-    
-    # Plot portfolio values
+
+    # ---- Left: Portfolio value expectation ----
     for K in strikes:
-        V_root = [portfolios[K]['V'][0, n] for n in times]
-        ax1.plot(times, V_root, marker='o', label=f'K={K}')
-    
+        V = portfolios[K]['V']
+        V_exp = []
+        for n in times:
+            nodes = V[:n+1, n]          # active nodes at time n
+            V_exp.append(np.mean(nodes))
+        ax1.plot(times, V_exp, marker='o', label=f'K={K}')
+
     ax1.set_xlabel('Time step n')
-    ax1.set_ylabel('Portfolio value V[0,n]')
-    ax1.set_title(f'Portfolio Value Replicating the {option_type.capitalize()}-Option over Time')
+    ax1.set_ylabel('E[V_n] (node average)')
+    ax1.set_title(f'Expected Portfolio Value over Time ({option_type.capitalize()})')
     ax1.legend()
     ax1.grid(True)
     ax1.set_xticks(times)
-    
-    # Plot option prices
+
+    # ---- Right: Option price expectation ----
     for K in strikes:
-        H_root = [portfolios[K]['H'][0, n] for n in times]
-        ax2.plot(times, H_root, marker='s', label=f'K={K}')
-    
+        H = portfolios[K]['H']
+        H_exp = []
+        for n in times:
+            nodes = H[:n+1, n]
+            H_exp.append(np.mean(nodes))
+        ax2.plot(times, H_exp, marker='s', label=f'K={K}')
+
     ax2.set_xlabel('Time step n')
-    ax2.set_ylabel('Option price H[0,n]')
-    ax2.set_title(f'Option Price of the {option_type.capitalize()}-Option over Time')
+    ax2.set_ylabel('E[H_n] (node average)')
+    ax2.set_title(f'Expected Option Price over Time ({option_type.capitalize()})')
     ax2.legend()
     ax2.grid(True)
     ax2.set_xticks(times)
-    
+
     plt.show()
-    
-    # To check the difference between portfolio value and the option prize, the maximal difference is taken 
-    # to ensure replication of the portfolio: 
+
+    # replication check (entire tree)
     for K in strikes:
         max_diff = np.max(np.abs(portfolios[K]['V'] - portfolios[K]['H']))
-        print(f" For K={K}: Maximal difference between V and H = {max_diff:.1e}")
+        print(f"For K={K}: Maximal difference between V and H = {max_diff:.1e}")
+
 
 
 def print_alpha_beta(portfolios, strikes, t):
